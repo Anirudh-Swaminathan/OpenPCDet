@@ -57,10 +57,14 @@ def parse_config():
     parser = argparse.ArgumentParser(description='arg parser')
     parser.add_argument('--cfg_file', type=str, default='cfgs/kitti_models/second.yaml',
                         help='specify the config for demo')
-    parser.add_argument('--data_path', type=str, default='demo_data',
-                        help='specify the point cloud data file or directory')
+    # parser.add_argument('--data_path', type=str, default='demo_data',
+    #                     help='specify the point cloud data file or directory')
+    parser.add_argument('--data_root', type=str, default='demo_data', help='specify the root of calib, velodyne and image files')
+    parser.add_argument('--file_number', type=str, default='000008', help='specify file number to detect objects for')
     parser.add_argument('--ckpt', type=str, default=None, help='specify the pretrained model')
     parser.add_argument('--ext', type=str, default='.bin', help='specify the extension of your point cloud data file')
+    # parser.add_argument('--ext')
+    parser.add_argument('--res', type=str, default="./results/", help="specify the results folder of the detection result")
 
     args = parser.parse_args()
 
@@ -70,12 +74,23 @@ def parse_config():
 
 
 def main():
+    print("Starting main()")
     args, cfg = parse_config()
     logger = common_utils.create_logger()
     logger.info('-----------------Quick Demo of OpenPCDet-------------------------')
+    # add data path that is required by the config
+    data_path = args.data_root + "velodyne/" + args.file_number + ".bin"
+    # build image path from given command line arguments
+    img_path = args.data_root + "image_2/" + args.file_number + ".png"
+    # build the calibration file path from given command line arguments
+    calib_path = args.data_root + "calib/" + args.file_number + ".txt"
+    print("data_path: {}".format(data_path))
+    print("img_path: {}".format(img_path))
+    print("calib_path: {}".format(calib_path))
     demo_dataset = DemoDataset(
         dataset_cfg=cfg.DATA_CONFIG, class_names=cfg.CLASS_NAMES, training=False,
-        root_path=Path(args.data_path), ext=args.ext, logger=logger
+        # root_path=Path(args.data_path), ext=args.ext, logger=logger
+        root_path = Path(data_path), ext=args.ext, logger=logger
     )
     logger.info(f'Total number of samples: \t{len(demo_dataset)}')
 
